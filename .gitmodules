@@ -1,0 +1,3 @@
+[submodule "FER/ResidualMaskingNetwork"]
+	path = FER/ResidualMaskingNetwork
+	url = https://github.com/phamquiluan/ResidualMaskingNetwork.git
