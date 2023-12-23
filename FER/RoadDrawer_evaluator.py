@@ -1,6 +1,7 @@
 
 from ResidualMaskingNetwork.rmn import RMN
 from matplotlib import pyplot as plt
+import argparse
 import cv2
 import time
 import threading
@@ -8,7 +9,9 @@ from tkinter import *
 import sys
 
 class RoadDrawer_Evaluator:
-    def __init__(self) -> None:
+    def __init__(self, save_path) -> None:
+
+        self.save_path = save_path
 
         self.m = RMN()
         self.cap = cv2.VideoCapture(0)
@@ -17,11 +20,16 @@ class RoadDrawer_Evaluator:
         
         self.root = Tk()
         self.root.title("Road Drawer evaluator")
+        self.root.geometry("300x200+100+100")
+        self.root.resizable(True, True)
         
-        start_button = Button(self.root, text="start", command=self.start_evaluation)
-        stop_button = Button(self.root, text="stop", command=self.stop_evaluation)
-        start_button.pack()
-        stop_button.pack()
+        start_button = Button(self.root, text="start", width=10, command=self.start_evaluation)
+        stop_button = Button(self.root, text="stop", width=10, command=self.stop_evaluation)
+        start_button.pack(side="left", anchor="n")
+        stop_button.pack(side="right", anchor="n")
+        
+        self.time_label = Label(self.root, text="0.0")
+        self.time_label.pack(side="top")
         
         self.root.mainloop()
         
@@ -57,7 +65,8 @@ class RoadDrawer_Evaluator:
         plt.legend()
         plt.ylabel("probability")
         plt.xlabel("time(sec)")
-        plt.savefig("FER_graphs/FER_graph_rotary_road_creator.png")
+        print(self.save_path)
+        plt.savefig(self.save_path)
         # plt.savefig("FER_graphs/test.png")
         
         self.root.destroy()
@@ -88,6 +97,7 @@ class RoadDrawer_Evaluator:
                     
                 self.plot_fer_prob(time.time() - self.start_time, tmp_prob_list)
                 
+                
                 self.total_frame+=1
                                 
             image = self.m.draw(frame, results)
@@ -96,11 +106,16 @@ class RoadDrawer_Evaluator:
             if ch == 27 or ch == "q" or ch == "Q":
                 break
         
+            self.time_label.config(text='%0.2f s' % (time.time() - self.start_time))
+            
         self.cap.release()
         cv2.destroyAllWindows()
             
 if __name__=="__main__":
-    run = RoadDrawer_Evaluator()
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument('--save-path', default="FER_graphs/test.png", help="path to save FER probability graphs")
+    args = parser.parse_args()
+    run = RoadDrawer_Evaluator(args.save_path)
     
     
     
